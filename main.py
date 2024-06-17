@@ -1,35 +1,65 @@
 import numpy as np
 from numpy.linalg import eig
+import matplotlib.pyplot as plt
+import networkx as nx
 
-OUTPUT_FILE = 'data.md'
+OUTPUT_FILE = 'data.html'
+
+def make_graph(adjacency_matrix, pathName):
+    myLabels = {}
+    for i in range(len(adjacency_matrix)):
+        myLabels[i] = str(i+1)
+        
+    rows, cols = np.where(adjacency_matrix == 1)
+    edges = zip(rows.tolist(), cols.tolist())
+    gr = nx.DiGraph()
+    gr.add_edges_from(edges)
+    nx.draw(gr, node_size=500, labels=myLabels, with_labels=True)
+    plt.savefig(pathName)
+    # clear the plot
+    plt.clf()
+
 
 def append_matrix(matrix, filename):
     matrix = np.array(matrix)
     eigvals, eigvecs = eig(matrix)
     counter = 0
 
-    # open the file ones and count the number of matrices present
-    f_read = open(filename, 'r')
-    # counte the number of lines containing '### Matrix'
-    for line in f_read.readlines():
-        if '### Matrix' in line:
-            counter += 1
-    f_read.close()
+    try:
+        # open the file ones and count the number of matrices present
+        f_read = open(filename, 'r')
+
+        # count the number of lines containing '### Matrix'
+        for line in f_read.readlines():
+            if 'Matrix' in line:
+                counter += 1
+        f_read.close()
+    except FileNotFoundError:
+        print("File not found.")
+    
+
+
+    # generate the image of the graph
+    make_graph(matrix, 'images/graph' + str(counter) + '.png')
 
     # open the file again to append the new matrix
     f = open(filename, 'a')
     
-    f.write('### Matrix ' + str(counter) + '\n\n')
-    f.write('<pre>\n')
+    f.write('<h2>Matrix ' + str(counter) + '</h2>\n\n')
+    f.write('<div class="graph-container">\n')
+    f.write('<img src="images/graph' + str(counter) + '.png" alt="Graph ' + str(counter) + '">\n\n')
+    f.write('<pre class="graph-matrix-data">\n')
     for i in range(matrix.shape[0]):
         for j in range(matrix.shape[1]):
             f.write(str(matrix[i, j]) + ' ')
         f.write("    x<sub>" + str(i) + "</sub> = " + "{:.2f}".format(eigvals[i]))
         f.write('\n')
     f.write('</pre>\n\n')
+    f.write('</div>\n')
 
     f.close()
     
+
 
 def main():
     while True:
