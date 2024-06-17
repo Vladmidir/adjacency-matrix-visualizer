@@ -1,3 +1,11 @@
+# Demo
+Running the commands in the CLI:
+
+![cli screenshot](screenshots/CLI.jpg)
+
+Visualizing the graph in the browser:
+![browser screenshot](screenshots/visual.jpg)
+
 # Running the Express Server
 
 To run the Express server on your machine, follow the steps below:
