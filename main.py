@@ -2,6 +2,7 @@ import numpy as np
 from numpy.linalg import eig
 import matplotlib.pyplot as plt
 import networkx as nx
+import os
 
 OUTPUT_FILE = 'data.html'
 
@@ -32,11 +33,13 @@ def append_matrix(matrix, filename):
         # count the number of lines containing '### Matrix'
         for line in f_read.readlines():
             if 'Matrix' in line:
+                # extract the matrix number
+                counter = int((line.split()[1])[:-5])
+
                 counter += 1
         f_read.close()
     except FileNotFoundError:
-        print("File not found.")
-    
+        pass
 
 
     # generate the image of the graph
@@ -49,9 +52,20 @@ def append_matrix(matrix, filename):
     f.write('<div class="graph-container">\n')
     f.write('<img src="images/graph' + str(counter) + '.png" alt="Graph ' + str(counter) + '">\n\n')
     f.write('<pre class="graph-matrix-data">\n')
+    # write the top vertex col numbers
+    f.write('    ')
     for i in range(matrix.shape[0]):
+        f.write(str(i+1) + '  ')
+    f.write('\n')
+    f.write('    ' + '_  '*matrix.shape[0] + '\n')
+    # start writing the matrix
+    for i in range(matrix.shape[0]):
+        # write the vertex row number
+        f.write(str(i+1) + ' | ')
+        # write the row elements
         for j in range(matrix.shape[1]):
-            f.write(str(matrix[i, j]) + ' ')
+            f.write(str(matrix[i, j]) + '  ')
+        # add an eigenvalue to the side
         f.write("    x<sub>" + str(i) + "</sub> = " + "{:.2f}".format(eigvals[i]))
         f.write('\n')
     f.write('</pre>\n\n')
@@ -59,17 +73,69 @@ def append_matrix(matrix, filename):
 
     f.close()
     
+def delete_matrix(matrix_number, filename):
+    f_read = open(filename, 'r')
+    lines = f_read.readlines()
+    f_read.close()
 
+    f_write = open(filename, 'w')
+
+    found = False
+    finishedDeleting = False
+
+    for line in lines:
+        if('Matrix ' + str(matrix_number) in line):
+            found = True
+            
+        if found and not finishedDeleting:
+            if '</div>' in line:
+                finishedDeleting = True
+                print('Matrix ' + str(matrix_number) + ' deleted.')
+            continue
+        f_write.write(line)
+    
+    f_write.close()
+
+    imageDeleted = False
+    # delete the image of the graph
+    try:
+        os.remove('images/graph' + str(matrix_number) + '.png')
+        imageDeleted = True
+    except FileNotFoundError:
+        pass
+
+    if not imageDeleted:
+        print('Image of Matrix ' + str(matrix_number) + ' not found.')
+    if not found:
+        print('Matrix ' + str(matrix_number) + ' not found.')
+        return 
+    if not finishedDeleting:
+        print('Matrix ' + str(matrix_number) + ' not deleted.')
+        return
 
 def main():
     while True:
-        user_input = input("Matrix size: ") #(e.g. '10' for 10 x 10 matrix)
+        user_input = input(">>>") #(e.g. '10' for 10 x 10 matrix)
         if user_input == "exit":
             break
+
+        user_input = user_input.split()
+
+        if len(user_input) != 2:
+            print("Invalid input. Valid command: 'add <size>', delte <matrix_number> or 'exit'")
+            continue
         
+        if user_input[0] == 'delete':
+            try:
+                matrix_number = int(user_input[1])
+                delete_matrix(matrix_number, OUTPUT_FILE)
+            except ValueError:
+                print("Invalid input. Please enter a valid matrix number.")
+            continue
+
         # Check if the input is a positive integer >= 2
         try:
-            size = int(user_input)
+            size = int(user_input[1])
             if size < 2:
                 print("Invalid input. Please enter a positive integer >= 2.")
         except ValueError:
