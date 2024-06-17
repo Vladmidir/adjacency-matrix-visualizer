@@ -1,5 +1,6 @@
 import numpy as np
 from numpy.linalg import eig
+from numpy.linalg import matrix_power
 import matplotlib.pyplot as plt
 import networkx as nx
 import os
@@ -15,6 +16,7 @@ def make_graph(adjacency_matrix, pathName):
     edges = zip(rows.tolist(), cols.tolist())
     gr = nx.DiGraph()
     gr.add_edges_from(edges)
+    print(myLabels)
     nx.draw(gr, node_size=500, labels=myLabels, with_labels=True)
     plt.savefig(pathName)
     # clear the plot
@@ -113,6 +115,29 @@ def delete_matrix(matrix_number, filename):
         print('Matrix ' + str(matrix_number) + ' not deleted.')
         return
 
+def record_matrix_power(matrix, power):
+    result = np.array(matrix)
+    result = matrix_power(result, power)
+    
+    f = open("powers.txt", 'w')
+
+    for i in range(len(matrix)):
+        for j in range(len(matrix[0])):
+            f.write(str(matrix[i][j]) + ' ')
+        f.write('\n')
+    f.write('\n')
+    f.write('to the power of ' + str(power) + ' is ' + '\n\n')
+    for i in range(result.shape[0]):
+        for j in range(result.shape[1]):
+            f.write(str(result[i, j]) + ' ')
+        f.write('\n')
+    f.write('\n\n')
+    f.write('Eigenvalues of the power: ' + str(eig(result)[0]) + '\n\n')
+    f.write('The sum of the eigenvalues: ' + str(sum(eig(result)[0])) + '\n\n')
+    f.close()
+
+
+
 def main():
     while True:
         user_input = input(">>>") #(e.g. '10' for 10 x 10 matrix)
@@ -121,10 +146,22 @@ def main():
 
         user_input = user_input.split()
 
-        if len(user_input) != 2:
+        if len(user_input) < 2:
             print("Invalid input. Valid command: 'add <size>', delete <matrix_number> or 'exit'")
             continue
-        
+
+        if user_input[0] == 'power':
+            n = int(user_input[1])
+            power = int(user_input[2])
+            matrix = []
+            for i in range(n):
+                line = input()
+                line = line.split()
+                matrix.append([int(x) for x in line])
+
+            record_matrix_power(matrix, power)
+            continue
+
         if user_input[0] == 'delete':
             if user_input[1] == 'all':
                 open(OUTPUT_FILE, 'w').close()
