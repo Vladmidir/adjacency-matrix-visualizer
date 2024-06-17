@@ -122,10 +122,17 @@ def main():
         user_input = user_input.split()
 
         if len(user_input) != 2:
-            print("Invalid input. Valid command: 'add <size>', delte <matrix_number> or 'exit'")
+            print("Invalid input. Valid command: 'add <size>', delete <matrix_number> or 'exit'")
             continue
         
         if user_input[0] == 'delete':
+            if user_input[1] == 'all':
+                open(OUTPUT_FILE, 'w').close()
+                os.system('rm images/*')
+                print("All matrices deleted.")
+                continue
+
+
             try:
                 matrix_number = int(user_input[1])
                 delete_matrix(matrix_number, OUTPUT_FILE)
