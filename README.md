@@ -47,3 +47,4 @@ You can now use the CLI to create, visualize, and delete graph adjacency matrice
 - `delete <matrix number>` - Delete the graph adjacency matrix with the specified number.
 - `delete all` - Delete all graph adjacency matrices.
 - `exit` - Exit the CLI.
+- `power <n> <power>` - Raise the `n x n` matrix to the power of `power`. The output is in the `powers.txt` file.
